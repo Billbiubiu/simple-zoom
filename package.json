@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "node build/build && jsdoc -c build/jsdoc.config.json",
+    "build": "node build/build",
     "dev": "node build/build --mode=development",
-    "jsdoc": "jsdoc -c build/jsdoc.config.json",
+    "jsdoc": "jsdoc -c build/jsdoc.config.json README.md",
     "start": "node svrx/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

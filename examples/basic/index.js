@@ -13,8 +13,8 @@ let app = {
         resetState: document.querySelector('#reset-state'),
     },
     init() {
-        for(let key in app) {
-            if(typeof app[key] === 'function') {
+        for (let key in app) {
+            if (typeof app[key] === 'function') {
                 app[key] = app[key].bind(this)
             }
         };
@@ -32,12 +32,12 @@ let app = {
         this.updateContent();
     },
     initEventListeners() {
-        let {eventLogger, toggleStateBar, changeContentType} = this;
-        let {openStateBar, closeStateBar, showState, showEvents, resetState, simpleZoom} = this.data;
+        let { eventLogger, toggleStateBar, changeContentType } = this;
+        let { openStateBar, closeStateBar, showState, showEvents, resetState, simpleZoom } = this.data;
 
         openStateBar.addEventListener('click', toggleStateBar);
         closeStateBar.addEventListener('click', toggleStateBar);
-        
+
         showState.addEventListener('click', changeContentType);
         showEvents.addEventListener('click', changeContentType);
         resetState.addEventListener('click', () => {
@@ -51,12 +51,12 @@ let app = {
 
     },
     toggleStateBar() {
-        let {openStateBar, stateBar} = this.data;
+        let { openStateBar, stateBar } = this.data;
         openStateBar.classList.toggle('hidden');
         stateBar.classList.toggle('hidden');
     },
     updateContent() {
-        let {state, stateBarContent, contentType} = this.data;
+        let { state, events, stateBarContent, contentType } = this.data;
         if (contentType === 'state') {
             let content = Object.keys(state).map(key => {
                 if (typeof state[key] == 'object') {
@@ -79,10 +79,10 @@ let app = {
         }
     },
     changeContentType() {
-        let {contentType, showState, showEvents} = this.data;
+        let { contentType, showState, showEvents } = this.data;
         showState.classList.toggle('hidden');
         showEvents.classList.toggle('hidden');
-        this.data.contentType = (contentType === 'state') ? 'events': 'state';
+        this.data.contentType = (contentType === 'state') ? 'events' : 'state';
         this.updateContent();
     },
     eventLogger(event) {

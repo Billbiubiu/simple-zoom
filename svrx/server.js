@@ -13,7 +13,7 @@ const server = svrx({
     index: 'index.html',                  // 访问根路径时展示的文件
     directory: true,                      // index.html不存在时显示文件列表页
   },
-  open: '/examples/index.html',
+  open: '/index.html',
   historyApiFallback: false,
   proxy: false, // 代理规则
   cors: true    // 跨域资源共享
