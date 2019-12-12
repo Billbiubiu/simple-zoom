@@ -1,9 +1,0 @@
-.simple-zoom-el{
-  cursor: pointer;
-}
-.simple-zoom-el.move{
-  cursor: move;
-}
-.simple-zoom-container{
-  overflow: hidden;
-}
