@@ -12,11 +12,12 @@ const assign = Object.assign;
 // 默认配置
 const DEFAULTOPTIONS = {
   zoomable: true, // 锁定 zoom
-  dragable: true,  // 锁定 position
+  dragable: true, // 锁定 position
   initZoom: 1,    // 原始缩放比例
   minZoom: 0.1,   // 最小缩放比例
   maxZoom: 10,    // 最大缩放比例
-  zoomSpeed: 0.2,  // 默认缩放速度
+  zoomSpeed: 0.2, // 默认缩放速度
+  padding: 0,     // 最大内边距
 };
 
 export default class SimpleZoom {
@@ -54,25 +55,28 @@ export default class SimpleZoom {
     }
     // 覆盖默认的配置
     this.options = assign({}, DEFAULTOPTIONS, options);
-    // 保存事件处理函数，方便移除时使用
-    this._on = {
-      // 滚轮事件
-      'mousewheel': eventHandlers.MouseWheel.bind(this),
-      'DOMMouseScroll': eventHandlers.MouseWheel.bind(this),
-      // 鼠标点击事件
-      'mousedown': eventHandlers.MouseDown.bind(this),
-      'mousemove': eventHandlers.MouseMove.bind(this),
-      'mouseup': eventHandlers.MouseUp.bind(this),
-      'mouseout': eventHandlers.MouseUp.bind(this),
-      // 移动端拖拽事件
-      'touchmovestart': eventHandlers.TouchMoveStart.bind(this),
-      'touchmove': eventHandlers.TouchMove.bind(this),
-      'touchmoveend': eventHandlers.TouchMoveEnd.bind(this),
-      // 移动端缩放事件
-      'touchzoomstart': eventHandlers.TouchZoomStart.bind(this),
-      'touchzoom': eventHandlers.TouchZoom.bind(this),
-      'touchzoomend': eventHandlers.TouchZoomEnd.bind(this),
-    }
+    // 不允许 padding 超过宽高的一半
+    let { offsetWidth, offsetHeight } = this.el;
+    this.options.padding = Math.min((offsetWidth / 2), (offsetHeight / 2), this.options.padding);
+      // 保存事件处理函数，方便移除时使用
+      this._on = {
+        // 滚轮事件
+        'mousewheel': eventHandlers.MouseWheel.bind(this),
+        'DOMMouseScroll': eventHandlers.MouseWheel.bind(this),
+        // 鼠标点击事件
+        'mousedown': eventHandlers.MouseDown.bind(this),
+        'mousemove': eventHandlers.MouseMove.bind(this),
+        'mouseup': eventHandlers.MouseUp.bind(this),
+        'mouseout': eventHandlers.MouseUp.bind(this),
+        // 移动端拖拽事件
+        'touchmovestart': eventHandlers.TouchMoveStart.bind(this),
+        'touchmove': eventHandlers.TouchMove.bind(this),
+        'touchmoveend': eventHandlers.TouchMoveEnd.bind(this),
+        // 移动端缩放事件
+        'touchzoomstart': eventHandlers.TouchZoomStart.bind(this),
+        'touchzoom': eventHandlers.TouchZoom.bind(this),
+        'touchzoomend': eventHandlers.TouchZoomEnd.bind(this),
+      }
     // 通过 on 添加的事件
     this._onListeners = Object.create(null);
     // 通过 addEventListener 添加的事件
@@ -89,13 +93,13 @@ export default class SimpleZoom {
     this.reset();
     this.update();
     // 根据配置确定是否启用缩放和拖拽
-    let {zoomable, dragable} = this.options;
-    if(zoomable) {
+    let { zoomable, dragable } = this.options;
+    if (zoomable) {
       this.el.addEventListener('mousewheel', this._on['mousewheel']);
       this.el.addEventListener('DOMMouseScroll', this._on['DOMMouseScroll']);
       this.parentNode.addEventListener('touchstart', this._on['touchzoomstart']);
     }
-    if(dragable) {
+    if (dragable) {
       this.el.addEventListener('mousedown', this._on['mousedown']);
       this.parentNode.addEventListener('touchstart', this._on['touchmovestart']);
     }
@@ -185,7 +189,7 @@ export default class SimpleZoom {
     if (initZoom <= 1) {
       state.dragable = false;
     }
-    if(initZoom != 1) {
+    if (initZoom != 1) {
       state.transformOrigin = {
         x: (this.el.offsetWidth / 2),
         y: (this.el.offsetHeight / 2)

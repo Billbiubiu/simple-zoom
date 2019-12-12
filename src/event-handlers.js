@@ -110,6 +110,7 @@ function MouseDown(event) {
  * @param {event} event 
  */
 function MouseMove(event) {
+  let { padding } = this.options;
   let { zoom, translate, transformOrigin, moveStart } = this.state;
   preventDefault(event);
   let { clientX, clientY } = event;
@@ -121,19 +122,19 @@ function MouseMove(event) {
   // 判断拖拽后元素有没有出界
   let margins = getMargins(this.el, zoom, newMovingTranslate, transformOrigin);
   for (let side in margins) {
-    if (margins[side] > 0) {
+    if (margins[side] > padding) {
       switch (side) {
         case 'top':
-          newMovingTranslate.y = (transformOrigin.y * (zoom - 1));
+          newMovingTranslate.y = (transformOrigin.y * (zoom - 1)) + padding;
           break;
         case 'right':
-          newMovingTranslate.x = ((this.el.offsetWidth - transformOrigin.x) * (1 - zoom));
+          newMovingTranslate.x = ((this.el.offsetWidth - transformOrigin.x) * (1 - zoom)) - padding;
           break;
         case 'bottom':
-          newMovingTranslate.y = ((this.el.offsetHeight- transformOrigin.y) * (1 - zoom));
+          newMovingTranslate.y = ((this.el.offsetHeight - transformOrigin.y) * (1 - zoom)) - padding;
           break;
         case 'left':
-          newMovingTranslate.x = (transformOrigin.x * (zoom - 1));
+          newMovingTranslate.x = (transformOrigin.x * (zoom - 1)) + padding;
           break;
       }
     }
@@ -192,6 +193,7 @@ function TouchMoveStart(event) {
  * @param {event} event 
  */
 function TouchMove(event) {
+  let { padding } = this.options;
   let { zoom, translate, touchStart, movingTranslate, transformOrigin } = this.state;
   preventDefault(event);
   let touches = parseTouches(this.parentNode, event.touches);
@@ -203,19 +205,19 @@ function TouchMove(event) {
   // 判断拖拽后元素有没有出界
   let margins = getMargins(this.el, zoom, newMovingTranslate, transformOrigin);
   for (let side in margins) {
-    if (margins[side] > 0) {
+    if (margins[side] > padding) {
       switch (side) {
         case 'top':
-          newMovingTranslate.y = (transformOrigin.y * (zoom - 1));
+          newMovingTranslate.y = (transformOrigin.y * (zoom - 1)) + padding;
           break;
         case 'right':
-          newMovingTranslate.x = ((this.el.offsetWidth - transformOrigin.x) * (1 - zoom));
+          newMovingTranslate.x = ((this.el.offsetWidth - transformOrigin.x) * (1 - zoom)) - padding;
           break;
         case 'bottom':
-          newMovingTranslate.y = ((this.el.offsetHeight- transformOrigin.y) * (1 - zoom));
+          newMovingTranslate.y = ((this.el.offsetHeight - transformOrigin.y) * (1 - zoom)) - padding;
           break;
         case 'left':
-          newMovingTranslate.x = (transformOrigin.x * (zoom - 1));
+          newMovingTranslate.x = (transformOrigin.x * (zoom - 1)) + padding;
           break;
       }
     }

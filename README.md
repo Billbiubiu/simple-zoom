@@ -1,5 +1,6 @@
 # simple-zoom
-provide a simple way to zoom your dom.
+simple-zoom provide a simple way to zoom your dom.
+send me a mail: <1607786753@qq.com>
 
  ## Captures
 
@@ -11,10 +12,16 @@ provide a simple way to zoom your dom.
   <img src="/captures/drag-move.gif" style="width: 20em;">
 
  ## Start
- run scripts blow then view the examples.
+
+ - dev
+  run scripts blow then view the examples.
   ```
   $ npm install
   $ npm start
+  ```
+- build
+  ```
+  $npm run build
   ```
 
 ## Usage
@@ -32,10 +39,13 @@ provide a simple way to zoom your dom.
 - init
 
   ```
-  let simpleZoom = new SimpleZoom('#simple-zoom',{
-    initZoom: 1,
-    minZoom: 0.1,
-    maxZoom: 10,
-    zoomSpeed: 0.2
+  let simpleZoom = new SimpleZoom('#simple-zoom', {
+    zoomable: true,   // 是否允许缩放
+    dragable: true,   // 是否允许拖拽
+    initZoom: 2,      // 初始缩放比例
+    minZoom: 0.1,     // 最小缩放比例
+    maxZoom: 10,      // 最大缩放比例
+    zoomSpeed: 0.2,   // 滚轮缩放速度
+    padding: 0,       // 最大内边距
   })
   ```
