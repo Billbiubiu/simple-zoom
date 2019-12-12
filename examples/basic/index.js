@@ -25,7 +25,7 @@ let app = {
         this.data.simpleZoom = new SimpleZoom('#zoom-item', {
             zoomable: true,
             dragable: true,
-            initZoom: 2,
+            initZoom: 1,
             minZoom: 0.1,
             maxZoom: 10,
             zoomSpeed: 0.2,
