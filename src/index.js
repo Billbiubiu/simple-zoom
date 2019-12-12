@@ -45,7 +45,6 @@ export default class SimpleZoom {
     // 设置父元素样式
     if (this.el.parentNode && this.el.parentNode.tagName) {
       this.parentNode = this.el.parentNode;
-      this.el.classList.add('simple-zoom-el');
       this.parentNode.classList.add('simple-zoom-container');
     } else {
       throw new Error('element can not be root-element!');
@@ -56,27 +55,33 @@ export default class SimpleZoom {
     // 覆盖默认的配置
     this.options = assign({}, DEFAULTOPTIONS, options);
     // 不允许 padding 超过宽高的一半
-    let { offsetWidth, offsetHeight } = this.el;
-    this.options.padding = Math.min((offsetWidth / 2), (offsetHeight / 2), this.options.padding);
-      // 保存事件处理函数，方便移除时使用
-      this._on = {
-        // 滚轮事件
-        'mousewheel': eventHandlers.MouseWheel.bind(this),
-        'DOMMouseScroll': eventHandlers.MouseWheel.bind(this),
-        // 鼠标点击事件
-        'mousedown': eventHandlers.MouseDown.bind(this),
-        'mousemove': eventHandlers.MouseMove.bind(this),
-        'mouseup': eventHandlers.MouseUp.bind(this),
-        'mouseout': eventHandlers.MouseUp.bind(this),
-        // 移动端拖拽事件
-        'touchmovestart': eventHandlers.TouchMoveStart.bind(this),
-        'touchmove': eventHandlers.TouchMove.bind(this),
-        'touchmoveend': eventHandlers.TouchMoveEnd.bind(this),
-        // 移动端缩放事件
-        'touchzoomstart': eventHandlers.TouchZoomStart.bind(this),
-        'touchzoom': eventHandlers.TouchZoom.bind(this),
-        'touchzoomend': eventHandlers.TouchZoomEnd.bind(this),
-      }
+    this.options.padding = Math.min((this.el.offsetWidth / 2), (this.el.offsetHeight / 2), this.options.padding);
+    // 不允许 initZoom 超过范围
+    this.options.initZoom = Math.max(Math.max(this.options.minZoom, this.options.initZoom), Math.min(this.options.maxZoom, this.options.initZoom));
+    // 根据 options 添加 class
+    let classList = this.el.classList;
+    classList.add('simple-zoom-el');
+    if(!this.options.zoomable) classList.add('zoom-locked');
+    if(!this.options.dragable) classList.add('drag-locked');
+    // 保存事件处理函数，方便移除时使用
+    this._on = {
+      // 滚轮事件
+      'mousewheel': eventHandlers.MouseWheel.bind(this),
+      'DOMMouseScroll': eventHandlers.MouseWheel.bind(this),
+      // 鼠标点击事件
+      'mousedown': eventHandlers.MouseDown.bind(this),
+      'mousemove': eventHandlers.MouseMove.bind(this),
+      'mouseup': eventHandlers.MouseUp.bind(this),
+      'mouseout': eventHandlers.MouseUp.bind(this),
+      // 移动端拖拽事件
+      'touchmovestart': eventHandlers.TouchMoveStart.bind(this),
+      'touchmove': eventHandlers.TouchMove.bind(this),
+      'touchmoveend': eventHandlers.TouchMoveEnd.bind(this),
+      // 移动端缩放事件
+      'touchzoomstart': eventHandlers.TouchZoomStart.bind(this),
+      'touchzoom': eventHandlers.TouchZoom.bind(this),
+      'touchzoomend': eventHandlers.TouchZoomEnd.bind(this),
+    }
     // 通过 on 添加的事件
     this._onListeners = Object.create(null);
     // 通过 addEventListener 添加的事件
@@ -147,7 +152,6 @@ export default class SimpleZoom {
       })
     }
   }
-  /* 外部操作方法 */
   /**
    * 重置当前 state
    * @memberof SimpleZoom
@@ -186,7 +190,7 @@ export default class SimpleZoom {
       // 两指间的距离
       touchDistance: 0,
     }
-    if (initZoom <= 1) {
+    if (initZoom < 1) {
       state.dragable = false;
     }
     if (initZoom != 1) {
@@ -257,6 +261,7 @@ export default class SimpleZoom {
     return this._state;
   }
   set state(state) {
+    // 以 option 的配置为标准
     state.zoomable = (state.zoomable && this.options.zoomable);
     state.dragable = (state.dragable && this.options.dragable);
     this._state = state;

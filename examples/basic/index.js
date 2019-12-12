@@ -23,12 +23,13 @@ let app = {
     },
     initSimpleZoom() {
         this.data.simpleZoom = new SimpleZoom('#zoom-item', {
-            zoomable: true,
-            dragable: true,
-            initZoom: 1,
-            minZoom: 0.1,
-            maxZoom: 10,
-            zoomSpeed: 0.2,
+            zoomable: true,   // 是否允许缩放
+            dragable: true,   // 是否允许拖拽
+            initZoom: 1,      // 初始缩放比例
+            minZoom: 0.1,     // 最小缩放比例
+            maxZoom: 10,      // 最大缩放比例
+            zoomSpeed: 0.2,   // 滚轮缩放速度
+            padding: 0,       // 最大内边距
         });
         this.data.state = this.data.simpleZoom.state;
         this.updateContent();

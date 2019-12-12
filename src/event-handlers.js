@@ -41,7 +41,7 @@ function MouseWheel(event) {
     newZoom = 1;
   }
   // 小于等于初始缩放比例时不允许拖拽，大于初始缩放比例时需要注意不能出界
-  if (newZoom <= 1) {
+  if (newZoom < 1) {
     dragable = false;
     translate = { x: 0, y: 0 };
     transformOrigin = {
@@ -298,8 +298,8 @@ function TouchZoom(event) {
   } else if (Math.abs(newZoom - 1) < (zoomSpeed / 2)) {
     newZoom = 1;
   }
-  // 小于等于初始缩放比例时不允许拖拽，大于初始缩放比例时需要注意不能出界
-  if (newZoom <= 1) {
+  // 小于等于 1 时不允许拖拽，大于 1 时需要注意不能出界
+  if (newZoom < 1) {
     dragable = false;
     translate = { x: 0, y: 0 };
     transformOrigin = {
@@ -311,9 +311,6 @@ function TouchZoom(event) {
     transformOrigin = {
       x: (a.offsetX + b.offsetX) / 2,
       y: (a.offsetY + b.offsetY) / 2,
-      // 相对 el 的位置
-      // x: (((a.offsetX + b.offsetX) / 2) - translate.x) / zoom,
-      // x: (((a.offsetY + b.offsetY) / 2) - translate.y) / zoom,
     }
     // 判断缩放后元素有没有出界
     let margins = getMargins(this.el, newZoom, translate, transformOrigin);

@@ -42,7 +42,7 @@ send me a mail: <1607786753@qq.com>
   let simpleZoom = new SimpleZoom('#simple-zoom', {
     zoomable: true,   // 是否允许缩放
     dragable: true,   // 是否允许拖拽
-    initZoom: 2,      // 初始缩放比例
+    initZoom: 1,      // 初始缩放比例
     minZoom: 0.1,     // 最小缩放比例
     maxZoom: 10,      // 最大缩放比例
     zoomSpeed: 0.2,   // 滚轮缩放速度

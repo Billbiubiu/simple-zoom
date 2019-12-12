@@ -1,9 +1,20 @@
+/* 溢出隐藏 */
+.simple-zoom-container{
+  overflow: hidden;
+}
+/* 鼠标移入改变鼠标样式 */
 .simple-zoom-el{
   cursor: pointer;
 }
+/* 禁止缩放，恢复默认图标 */
+.simple-zoom-el.zoom-locked{
+  cursor: default;
+}
+/* 禁止拖拽，恢复默认图标 */
+.simple-zoom-el.drag-locked{
+  cursor: default;
+}
+/* 拖拽时改变鼠标样式 */
 .simple-zoom-el.move{
   cursor: move;
-}
-.simple-zoom-container{
-  overflow: hidden;
 }
