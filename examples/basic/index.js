@@ -23,7 +23,8 @@ let app = {
     },
     initSimpleZoom() {
         this.data.simpleZoom = new SimpleZoom('#zoom-item', {
-            initZoom: 1,
+            zoomable: false,
+            initZoom: 2,
             minZoom: 0.1,
             maxZoom: 10,
             zoomSpeed: 0.2,

@@ -11,6 +11,8 @@ const assign = Object.assign;
 
 // 默认配置
 const DEFAULTOPTIONS = {
+  zoomable: true, // 锁定 zoom
+  dragable: true,  // 锁定 position
   initZoom: 1,    // 原始缩放比例
   minZoom: 0.1,   // 最小缩放比例
   maxZoom: 10,    // 最大缩放比例
@@ -86,12 +88,17 @@ export default class SimpleZoom {
     // 初始状态
     this.reset();
     this.update();
-    // 添加事件监听
-    this.el.addEventListener('mousewheel', this._on['mousewheel'])
-    this.el.addEventListener('DOMMouseScroll', this._on['DOMMouseScroll'])
-    this.el.addEventListener('mousedown', this._on['mousedown']);
-    this.parentNode.addEventListener('touchstart', this._on['touchmovestart']);
-    this.parentNode.addEventListener('touchstart', this._on['touchzoomstart']);
+    // 根据配置确定是否启用缩放和拖拽
+    let {zoomable, dragable} = this.options;
+    if(zoomable) {
+      this.el.addEventListener('mousewheel', this._on['mousewheel']);
+      this.el.addEventListener('DOMMouseScroll', this._on['DOMMouseScroll']);
+      this.parentNode.addEventListener('touchstart', this._on['touchzoomstart']);
+    }
+    if(dragable) {
+      this.el.addEventListener('mousedown', this._on['mousedown']);
+      this.parentNode.addEventListener('touchstart', this._on['touchmovestart']);
+    }
   }
   /**
    * 设置 transform 属性
@@ -142,12 +149,12 @@ export default class SimpleZoom {
    * @memberof SimpleZoom
    */
   reset() {
-    let { initZoom } = this.options;
+    let { zoomable, dragable, initZoom } = this.options;
     let state = {
       // 缩放锁
-      zoomLock: false,
+      zoomable: zoomable,
       // 位置锁
-      positionLock: true,
+      dragable: dragable,
       // 缩放比例
       zoom: initZoom,
       // 偏移位置
@@ -175,10 +182,13 @@ export default class SimpleZoom {
       // 两指间的距离
       touchDistance: 0,
     }
-    if (initZoom !== 1) {
+    if (initZoom <= 1) {
+      state.dragable = false;
+    }
+    if(initZoom != 1) {
       state.transformOrigin = {
         x: (this.el.offsetWidth / 2),
-        y: (this.offsetHeight / 2)
+        y: (this.el.offsetHeight / 2)
       }
     }
     this.setState(state);
@@ -239,7 +249,14 @@ export default class SimpleZoom {
       });
     }
   }
-  /* 事件监听相关方法 */
+  get state() {
+    return this._state;
+  }
+  set state(state) {
+    state.zoomable = (state.zoomable && this.options.zoomable);
+    state.dragable = (state.dragable && this.options.dragable);
+    this._state = state;
+  }
   /**
    * 绑定事件监听
    * @memberof SimpleZoom

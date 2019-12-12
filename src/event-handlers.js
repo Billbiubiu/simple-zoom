@@ -13,8 +13,8 @@ const assign = Object.assign;
 function MouseWheel(event) {
   // 获取配置
   let { minZoom, maxZoom, zoomSpeed } = this.options;
-  let { zoomLock, positionLock, zoom, translate, transformOrigin } = this.state;
-  if (zoomLock) return;
+  let { zoomable, dragable, zoom, translate, transformOrigin } = this.state;
+  if (!zoomable) return;
   preventDefault(event);
   cancelBubble(event);
   // 获取鼠标位置
@@ -42,14 +42,14 @@ function MouseWheel(event) {
   }
   // 小于等于初始缩放比例时不允许拖拽，大于初始缩放比例时需要注意不能出界
   if (newZoom <= 1) {
-    positionLock = true;
+    dragable = false;
     translate = { x: 0, y: 0 };
     transformOrigin = {
       x: (this.el.offsetWidth / 2),
       y: (this.el.offsetHeight / 2),
     }
   } else {
-    positionLock = false;
+    dragable = true;
     transformOrigin = {
       x: offsetX,
       y: offsetY,
@@ -76,7 +76,7 @@ function MouseWheel(event) {
     }
   }
   this.setState(assign({}, this.state, {
-    positionLock,
+    dragable,
     zoom: newZoom,
     translate,
     transformOrigin,
@@ -87,8 +87,8 @@ function MouseWheel(event) {
  * @param {event} event 
  */
 function MouseDown(event) {
-  let { positionLock, translate } = this.state;
-  if (positionLock) return;
+  let { dragable, translate } = this.state;
+  if (!dragable) return;
   preventDefault(event);
   let { clientX, clientY } = event;
   this.setState(assign({}, this.state, {
@@ -110,7 +110,7 @@ function MouseDown(event) {
  * @param {event} event 
  */
 function MouseMove(event) {
-  let { zoom, translate, movingTranslate, transformOrigin, moveStart } = this.state;
+  let { zoom, translate, transformOrigin, moveStart } = this.state;
   preventDefault(event);
   let { clientX, clientY } = event;
   // 计算移动后的 translate
@@ -162,9 +162,9 @@ function MouseUp() {
  * @param {event} event 
  */
 function TouchMoveStart(event) {
-  let { positionLock, isTouchZoom, translate } = this.state;
+  let { dragable, isTouchZoom, translate } = this.state;
   // 如果位置被锁定或已进入拖拽模式，直接返回
-  if (positionLock || isTouchZoom) return;
+  if (!dragable || isTouchZoom) return;
   preventDefault(event);
   let touches = parseTouches(this.parentNode, event.touches);
   let length = touches.length;
@@ -241,8 +241,8 @@ function TouchMoveEnd() {
  * @param {event} event 
  */
 function TouchZoomStart(event) {
-  let { zoomLock, touchTimer, isTouchMoving } = this.state;
-  if (zoomLock || isTouchMoving) return;
+  let { zoomable, touchTimer, isTouchMoving } = this.state;
+  if (!zoomable || isTouchMoving) return;
   preventDefault(event);
   let touches = parseTouches(this.parentNode, event.touches);
   let length = touches.length;
@@ -268,7 +268,7 @@ function TouchZoomStart(event) {
 function TouchZoom(event) {
   preventDefault(event);
   let { minZoom, maxZoom, zoomSpeed } = this.options;
-  let { positionLock, zoom, translate, transformOrigin, touchZoomTimer, touchDistance } = this.state;
+  let { dragable, zoom, translate, transformOrigin, touchZoomTimer, touchDistance } = this.state;
   let touches = parseTouches(this.parentNode, event.touches);
   let length = touches.length;
   let [a, b] = touches;
@@ -298,14 +298,14 @@ function TouchZoom(event) {
   }
   // 小于等于初始缩放比例时不允许拖拽，大于初始缩放比例时需要注意不能出界
   if (newZoom <= 1) {
-    positionLock = true;
+    dragable = false;
     translate = { x: 0, y: 0 };
     transformOrigin = {
       x: (this.el.offsetWidth / 2),
       y: (this.el.offsetHeight / 2),
     }
   } else {
-    positionLock = false;
+    dragable = true;
     transformOrigin = {
       x: (a.offsetX + b.offsetX) / 2,
       y: (a.offsetY + b.offsetY) / 2,
@@ -335,7 +335,7 @@ function TouchZoom(event) {
     }
   }
   this.setState(assign({}, this.state, {
-    positionLock,
+    dragable,
     zoom: newZoom,
     translate,
     transformOrigin,
