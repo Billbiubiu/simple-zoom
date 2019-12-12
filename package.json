@@ -1,0 +1,39 @@
+{
+  "name": "simple-zoom",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "node build/build && jsdoc -c build/jsdoc.config.json",
+    "dev": "node build/build --mode=development",
+    "jsdoc": "jsdoc -c build/jsdoc.config.json",
+    "start": "node svrx/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@svrx/svrx": "^1.1.3",
+    "babel-core": "^6.22.1",
+    "babel-loader": "^7.1.1",
+    "body-parser": "^1.19.0",
+    "chalk": "^2.0.1",
+    "css-loader": "^3.2.1",
+    "docdash": "^1.1.1",
+    "extract-text-webpack-plugin": "^4.0.0-beta.0",
+    "file-loader": "^5.0.2",
+    "html-webpack-plugin": "^2.30.1",
+    "jsdoc": "^3.6.3",
+    "ora": "^1.2.0",
+    "rimraf": "^2.6.0",
+    "style-loader": "^1.0.1",
+    "uglifyjs-webpack-plugin": "^1.1.6",
+    "url-loader": "^0.5.8",
+    "webpack": "^4.41.2",
+    "webpack-bundle-analyzer": "^2.9.0",
+    "webpack-dev-server": "^2.9.1",
+    "webpack-merge": "^4.1.0",
+    "yargs": "^15.0.2"
+  },
+  "dependencies": {}
+}
