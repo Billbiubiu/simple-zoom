@@ -1,20 +1,15 @@
 /**
  * simple-zoom 1.0.0
- * 
+ * https://github.com/Billbiubiu/simple-zoom
  * Author: Wuhao 
- * https://github.com/Billbiubiu
  */
-import './index.css';
-import {
-  isHTMLElement,
-  preventDefault,
-  cancelBubble,
-  deepCompare,
-  parseTouches,
-  getMargins,
-} from './utils';
 
+import './index.css';
+import * as utils from './utils';
+import * as eventHandlers from './event-handlers';
 const assign = Object.assign;
+
+// 默认配置
 const DEFAULTOPTIONS = {
   initZoom: 1,    // 原始缩放比例
   minZoom: 0.1,   // 最小缩放比例
@@ -38,7 +33,7 @@ export default class SimpleZoom {
         throw new Error('element not found!');
       }
     } else if (typeof el == 'object') {
-      if (isHTMLElement(el)) {
+      if (utils.isHTMLElement(el)) {
         this.el = el;
       } else {
         throw new Error('element is not HTMLElement!');
@@ -58,27 +53,27 @@ export default class SimpleZoom {
     // 覆盖默认的配置
     this.options = assign({}, DEFAULTOPTIONS, options);
     // 保存事件处理函数，方便移除时使用
-    this._internalListeners = {
+    this._on = {
       // 滚轮事件
-      'mousewheel': this._onMouseWheel.bind(this),
-      'DOMMouseScroll': this._onMouseWheel.bind(this),
+      'mousewheel': eventHandlers.MouseWheel.bind(this),
+      'DOMMouseScroll': eventHandlers.MouseWheel.bind(this),
       // 鼠标点击事件
-      'mousedown': this._onMouseDown.bind(this),
-      'mousemove': this._onMouseMove.bind(this),
-      'mouseup': this._onMouseUp.bind(this),
-      'mouseout': this._onMouseUp.bind(this),
+      'mousedown': eventHandlers.MouseDown.bind(this),
+      'mousemove': eventHandlers.MouseMove.bind(this),
+      'mouseup': eventHandlers.MouseUp.bind(this),
+      'mouseout': eventHandlers.MouseUp.bind(this),
       // 移动端拖拽事件
-      'touchmovestart': this._onTouchMoveStart.bind(this),
-      'touchmove': this._onTouchMove.bind(this),
-      'touchmoveend': this._onTouchMoveEnd.bind(this),
+      'touchmovestart': eventHandlers.TouchMoveStart.bind(this),
+      'touchmove': eventHandlers.TouchMove.bind(this),
+      'touchmoveend': eventHandlers.TouchMoveEnd.bind(this),
       // 移动端缩放事件
-      'touchzoomstart': this._onTouchZoomStart.bind(this),
-      'touchzoom': this._onTouchZoom.bind(this),
-      'touchzoomend': this._onTouchZoomEnd.bind(this),
+      'touchzoomstart': eventHandlers.TouchZoomStart.bind(this),
+      'touchzoom': eventHandlers.TouchZoom.bind(this),
+      'touchzoomend': eventHandlers.TouchZoomEnd.bind(this),
     }
-    // 通过 this.on 添加的事件
+    // 通过 on 添加的事件
     this._onListeners = Object.create(null);
-    // 通过 this.addEventListener 添加的事件
+    // 通过 addEventListener 添加的事件
     this._eventListeners = Object.create(null);
     // 初始化
     this._init();
@@ -92,11 +87,11 @@ export default class SimpleZoom {
     this.reset();
     this.update();
     // 添加事件监听
-    this.el.addEventListener('mousewheel', this._internalListeners['mousewheel'])
-    this.el.addEventListener('DOMMouseScroll', this._internalListeners['DOMMouseScroll'])
-    this.el.addEventListener('mousedown', this._internalListeners['mousedown']);
-    this.parentNode.addEventListener('touchstart', this._internalListeners['touchmovestart']);
-    this.parentNode.addEventListener('touchstart', this._internalListeners['touchzoomstart']);
+    this.el.addEventListener('mousewheel', this._on['mousewheel'])
+    this.el.addEventListener('DOMMouseScroll', this._on['DOMMouseScroll'])
+    this.el.addEventListener('mousedown', this._on['mousedown']);
+    this.parentNode.addEventListener('touchstart', this._on['touchmovestart']);
+    this.parentNode.addEventListener('touchstart', this._on['touchzoomstart']);
   }
   /**
    * 设置 transform 属性
@@ -123,7 +118,7 @@ export default class SimpleZoom {
    * @param {string} type 
    * @param {event} event 
    */
-  _excuteListeners(type, event) {
+  _dispatchEvent(type, event) {
     if (this._onListeners[type]) {
       try {
         this._onListeners[type](event);
@@ -140,362 +135,6 @@ export default class SimpleZoom {
         }
       })
     }
-  }
-  /**
-   * 鼠标滚轮缩放
-   * @memberof SimpleZoom
-   * @param {event} event 
-   */
-  _onMouseWheel(event) {
-    // 获取配置
-    let { minZoom, maxZoom, zoomSpeed } = this.options;
-    let { zoomLock, positionLock, zoom, translate, transformOrigin } = this.state;
-    if (zoomLock) return;
-    preventDefault(event);
-    cancelBubble(event);
-    // 获取鼠标位置
-    let { offsetX, offsetY } = event;
-    // 根据缩放幅度和缩放速度计算缩放比例
-    let delta = Math.max(-1, Math.min(1, (event.wheelDelta || -event.detail))) * zoomSpeed;
-    let newZoom = zoom + delta;
-    // 边界情况判断，开启回弹效果
-    if (newZoom < minZoom) {
-      newZoom = Math.max(minZoom - zoomSpeed, 0);
-      setTimeout(() => {
-        this.setState(assign({}, this.state, {
-          zoom: minZoom
-        }))
-      }, 300)
-    } else if (newZoom > maxZoom) {
-      newZoom = maxZoom + zoomSpeed;
-      setTimeout(() => {
-        this.setState(assign({}, this.state, {
-          zoom: maxZoom
-        }))
-      }, 300)
-    } else if (Math.abs(newZoom - 1) < (zoomSpeed / 2)) {
-      newZoom = 1;
-    }
-    // 小于等于初始缩放比例时不允许拖拽，大于初始缩放比例时需要注意不能出界
-    if (newZoom <= 1) {
-      positionLock = true;
-      translate = { x: 0, y: 0 };
-      transformOrigin = {
-        x: (this.el.offsetWidth / 2),
-        y: (this.el.offsetHeight / 2),
-      }
-    } else {
-      positionLock = false;
-      transformOrigin = {
-        x: offsetX,
-        y: offsetY,
-      }
-      // 判断缩放后元素有没有出界
-      let margins = getMargins(this.el, newZoom, translate, transformOrigin);
-      for (let side in margins) {
-        if (margins[side] > 0) {
-          switch (side) {
-            case 'top':
-              translate.y -= margins.top;
-              break;
-            case 'right':
-              translate.x += margins.right;
-              break;
-            case 'bottom':
-              translate.y += margins.bottom;
-              break;
-            case 'left':
-              translate.x -= margins.left;
-              break;
-          }
-        }
-      }
-    }
-    this.setState(assign({}, this.state, {
-      positionLock,
-      zoom: newZoom,
-      translate,
-      transformOrigin,
-    }))
-  }
-  /**
-   * 鼠标点击进入拖拽模式
-   * @memberof SimpleZoom
-   * @param {event} event 
-   */
-  _onMouseDown(event) {
-    let { positionLock, translate } = this.state;
-    if (positionLock) return;
-    preventDefault(event);
-    let { clientX, clientY } = event;
-    this.setState(assign({}, this.state, {
-      isMouseMoving: true,
-      moveStart: {
-        x: clientX,
-        y: clientY,
-      },
-      movingTranslate: assign({}, translate),
-    }));
-    // 修改cursor样式
-    this.el.classList.add('move');
-    this.el.addEventListener('mousemove', this._internalListeners['mousemove']);
-    this.el.addEventListener('mouseup', this._internalListeners['mouseup']);
-    this.el.addEventListener('mouseout', this._internalListeners['mouseout']);
-  }
-  /**
-   * 移动鼠标进行拖拽
-   * @memberof SimpleZoom
-   * @param {event} event 
-   */
-  _onMouseMove(event) {
-    let { zoom, translate, movingTranslate, transformOrigin, moveStart } = this.state;
-    preventDefault(event);
-    let { clientX, clientY } = event;
-    // 计算移动后的 translate
-    let newMovingTranslate = {
-      x: translate.x + (clientX - moveStart.x),
-      y: translate.y + (clientY - moveStart.y),
-    }
-    // 判断拖拽后元素有没有出界
-    let margins = getMargins(this.el, zoom, newMovingTranslate, transformOrigin);
-    for (let side in margins) {
-      if (margins[side] > 0) {
-        switch (side) {
-          case 'top':
-            newMovingTranslate.y = (transformOrigin.y * (zoom - 1));
-            break;
-          case 'right':
-            newMovingTranslate.x = ((this.el.offsetWidth - transformOrigin.x) * (1 - zoom));
-            break;
-          case 'bottom':
-            newMovingTranslate.y = ((this.el.offsetHeight- transformOrigin.y) * (1 - zoom));
-            break;
-          case 'left':
-            newMovingTranslate.x = (transformOrigin.x * (zoom - 1));
-            break;
-        }
-      }
-    }
-    this.setState(assign({}, this.state, {
-      movingTranslate: newMovingTranslate
-    }));
-  }
-  /**
-   * 鼠标抬起退出拖拽模式
-   * @memberof SimpleZoom
-   */
-  _onMouseUp() {
-    let { movingTranslate } = this.state;
-    this.setState(assign({}, this.state, {
-      translate: assign({}, movingTranslate),
-      isMouseMoving: false,
-    }));
-    this.el.classList.remove('move');
-    this.el.removeEventListener('mousemove', this._internalListeners['mousemove']);
-    this.el.removeEventListener('mouseup', this._internalListeners['mouseup']);
-    this.el.removeEventListener('mouseout', this._internalListeners['mouseout']);
-  }
-  /* 移动端适配 */
-  /**
-   * 单指 touch 进入拖拽模式
-   * @memberof SimpleZoom
-   * @param {event} event 
-   */
-  _onTouchMoveStart(event) {
-    let { positionLock, isTouchZoom, translate } = this.state;
-    // 如果位置被锁定或已进入拖拽模式，直接返回
-    if (positionLock || isTouchZoom) return;
-    preventDefault(event);
-    let touches = parseTouches(this.parentNode, event.touches);
-    let length = touches.length;
-    if (length !== 2) {
-      // 延迟执行，如果 100ms 内变为双指，则判定为缩放操作
-      this.state.touchTimer = setTimeout(() => {
-        let touch = event.touches[0];
-        let { clientX, clientY } = touch;
-        this.setState(assign({}, this.state, {
-          touchTimer: null,
-          isTouchMoving: true,
-          touchStart: {
-            x: clientX,
-            y: clientY
-          },
-          movingTranslate: assign({}, translate)
-        }));
-        this.parentNode.addEventListener('touchmove', this._internalListeners['touchmove']);
-        this.parentNode.addEventListener('touchend', this._internalListeners['touchmoveend']);
-      }, 100)
-    }
-  }
-  /**
-   * 移动手指进行拖拽
-   * @memberof SimpleZoom
-   * @param {event} event 
-   */
-  _onTouchMove(event) {
-    let { zoom, translate, touchStart, movingTranslate, transformOrigin } = this.state;
-    preventDefault(event);
-    let touches = parseTouches(this.parentNode, event.touches);
-    let { clientX, clientY } = touches[0];
-    let newMovingTranslate = {
-      x: translate.x + (clientX - touchStart.x),
-      y: translate.y + (clientY - touchStart.y),
-    }
-    // 判断拖拽后元素有没有出界
-    let margins = getMargins(this.el, zoom, newMovingTranslate, transformOrigin);
-    for (let side in margins) {
-      if (margins[side] > 0) {
-        switch (side) {
-          case 'top':
-            newMovingTranslate.y = (transformOrigin.y * (zoom - 1));
-            break;
-          case 'right':
-            newMovingTranslate.x = ((this.el.offsetWidth - transformOrigin.x) * (1 - zoom));
-            break;
-          case 'bottom':
-            newMovingTranslate.y = ((this.el.offsetHeight- transformOrigin.y) * (1 - zoom));
-            break;
-          case 'left':
-            newMovingTranslate.x = (transformOrigin.x * (zoom - 1));
-            break;
-        }
-      }
-    }
-    this.setState(assign({}, this.state, {
-      movingTranslate: newMovingTranslate
-    }));
-  }
-  /**
-   * 手指抬起退出拖拽模式
-   * @memberof SimpleZoom
-   */
-  _onTouchMoveEnd() {
-    let { movingTranslate } = this.state;
-    this.setState(assign({}, this.state, {
-      translate: assign({}, movingTranslate),
-      isTouchMoving: false,
-    }));
-    this.parentNode.removeEventListener('touchmove', this._internalListeners['touchmove']);
-    this.parentNode.removeEventListener('touchend', this._internalListeners['touchmoveend']);
-  }
-  /**
-   * 双指 touch 进入缩放模式
-   * @memberof SimpleZoom
-   * @param {event} event 
-   */
-  _onTouchZoomStart(event) {
-    let { zoomLock, touchTimer, isTouchMoving } = this.state;
-    if (zoomLock || isTouchMoving) return;
-    preventDefault(event);
-    let touches = parseTouches(this.parentNode, event.touches);
-    let length = touches.length;
-    if (length === 2) {
-      // 100ms 内变为两指，取消拖拽操作
-      if (touchTimer) {
-        window.clearTimeout(touchTimer);
-      }
-      let [a, b] = touches;
-      this.setState(assign({}, this.state, {
-        touchTimer: null,
-        isTouchZoom: true,
-        touchDistance: Math.sqrt(Math.pow((a.offsetX - b.offsetX), 2) + Math.pow((a.offsetY - b.offsetY), 2)),
-      }));
-      this.parentNode.addEventListener('touchmove', this._internalListeners['touchzoom']);
-      this.parentNode.addEventListener('touchend', this._internalListeners['touchzoomend']);
-    }
-  }
-  /**
-   * 移动手指进行缩放
-   * @memberof SimpleZoom
-   * @param {event} event 
-   */
-  _onTouchZoom(event) {
-    preventDefault(event);
-    let { minZoom, maxZoom, zoomSpeed } = this.options;
-    let { positionLock, zoom, translate, transformOrigin, touchZoomTimer, touchDistance } = this.state;
-    let touches = parseTouches(this.parentNode, event.touches);
-    let length = touches.length;
-    let [a, b] = touches;
-    // 必须放在 timer 前
-    if (length === 1) {
-      this._onTouchZoomEnd();
-      return;
-    }
-    // 100ms 内重复触发不再执行
-    if (touchZoomTimer) {
-      return;
-    } else {
-      this.state.touchZoomTimer = setTimeout(() => {
-        this.state.touchZoomTimer = null;
-      }, 100);
-    }
-    let newTouchDistance = Math.sqrt(Math.pow((a.offsetX - b.offsetX), 2) + Math.pow((a.offsetY - b.offsetY), 2));
-    let delta = (newTouchDistance / touchDistance);
-    let newZoom = zoom * delta;
-    // 边界情况判断
-    if (newZoom < minZoom) {
-      newZoom = minZoom;
-    } else if (newZoom > maxZoom) {
-      newZoom = maxZoom;
-    } else if (Math.abs(newZoom - 1) < (zoomSpeed / 2)) {
-      newZoom = 1;
-    }
-    // 小于等于初始缩放比例时不允许拖拽，大于初始缩放比例时需要注意不能出界
-    if (newZoom <= 1) {
-      positionLock = true;
-      translate = { x: 0, y: 0 };
-      transformOrigin = {
-        x: (this.el.offsetWidth / 2),
-        y: (this.el.offsetHeight / 2),
-      }
-    } else {
-      positionLock = false;
-      transformOrigin = {
-        x: (a.offsetX + b.offsetX) / 2,
-        y: (a.offsetY + b.offsetY) / 2,
-        // 相对 el 的位置
-        // x: (((a.offsetX + b.offsetX) / 2) - translate.x) / zoom,
-        // x: (((a.offsetY + b.offsetY) / 2) - translate.y) / zoom,
-      }
-      // 判断缩放后元素有没有出界
-      let margins = getMargins(this.el, newZoom, translate, transformOrigin);
-      for (let side in margins) {
-        if (margins[side] > 0) {
-          switch (side) {
-            case 'top':
-              translate.y -= margins.top;
-              break;
-            case 'right':
-              translate.x += margins.right;
-              break;
-            case 'bottom':
-              translate.y += margins.bottom;
-              break;
-            case 'left':
-              translate.x -= margins.left;
-              break;
-          }
-        }
-      }
-    }
-    this.setState(assign({}, this.state, {
-      positionLock,
-      zoom: newZoom,
-      translate,
-      transformOrigin,
-      touchDistance: newTouchDistance,
-    }))
-  }
-  /**
-   * 手指抬起退出缩放模式
-   * @memberof SimpleZoom
-   */
-  _onTouchZoomEnd() {
-    this.setState(assign({}, this.state, {
-      isTouchZoom: false
-    }))
-    this.parentNode.removeEventListener('touchmove', this._internalListeners['touchzoom']);
-    this.parentNode.removeEventListener('touchmoveend', this._internalListeners['touchzoomend'])
   }
   /* 外部操作方法 */
   /**
@@ -562,9 +201,9 @@ export default class SimpleZoom {
     this.state = this.state || state;
     // 对比前后的 state，根据变动抛出相应的事件
     let isMoving = (state.isMouseMoving || state.isTouchMoving);
-    let isZoomed = !deepCompare(this.state.zoom, state.zoom);
-    let isTranslated = !deepCompare(this.state.translate, state.translate);
-    let transformOriginChanged = !deepCompare(this.state.transformOrigin, state.transformOrigin);
+    let isZoomed = !utils.deepCompare(this.state.zoom, state.zoom);
+    let isTranslated = !utils.deepCompare(this.state.translate, state.translate);
+    let transformOriginChanged = !utils.deepCompare(this.state.transformOrigin, state.transformOrigin);
     this.state = assign({}, this.state, state);
     // 移动过程中以及 zoom 和 translate 变更时，需要更新 style.transform
     if (isMoving) {
@@ -579,21 +218,21 @@ export default class SimpleZoom {
     // 触发相应的事件
     let timestamp = Date.now();
     if (isMoving || isTranslated) {
-      this._excuteListeners('move', {
+      this._dispatchEvent('move', {
         type: 'move',
         data: state,
         timestamp,
       });
     }
     if (isZoomed) {
-      this._excuteListeners('zoom', {
+      this._dispatchEvent('zoom', {
         type: 'zoom',
         data: state,
         timestamp,
       });
     }
     if (transformOriginChanged) {
-      this._excuteListeners('origin-change', {
+      this._dispatchEvent('origin-change', {
         type: 'origin-change',
         data: state,
         timestamp,
