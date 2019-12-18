@@ -33,13 +33,13 @@ export default class SimpleZoom {
     } else if (typeof el == 'string') {
       this.el = document.querySelector(el);
       if (!this.el) {
-        throw new Error('element not found!');
+        throw new Error('target is not found!');
       }
     } else if (typeof el == 'object') {
       if (utils.isHTMLElement(el)) {
         this.el = el;
       } else {
-        throw new Error('element is not HTMLElement!');
+        throw new Error('target is not HTMLElement!');
       }
     }
     // 设置父元素样式
@@ -47,7 +47,7 @@ export default class SimpleZoom {
       this.parentNode = this.el.parentNode;
       this.parentNode.classList.add('simple-zoom-container');
     } else {
-      throw new Error('element can not be root-element!');
+      throw new Error('target can not be root-element!');
     }
     if (typeof options !== 'object') {
       throw new Error('options is supposed to be an object!')

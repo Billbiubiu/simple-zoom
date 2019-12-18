@@ -1,10 +1,9 @@
 'use strict'
 const ora = require('ora')
 const rm = require('rimraf')
-const path = require('path')
 const chalk = require('chalk')
 const webpack = require('webpack');
-const webpackConfig = require('../build/pack-as-plugin');
+const webpackConfig = require('./webpack.dev.config');
 
 module.exports = () => {
   return new Promise((resolve, reject) => {

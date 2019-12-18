@@ -1,18 +1,9 @@
 'use strict'
 const ora = require('ora')
 const rm = require('rimraf')
-const path = require('path')
 const chalk = require('chalk')
 const webpack = require('webpack');
-const yargs = require('yargs');
-
-let webpackConfig = require('./pack-as-plugin');
-
-const argv = yargs.alias('m', 'mode').argv;
-
-if(argv.mode === 'development') {
-  webpackConfig = require('./watch-file-change');
-}
+const webpackConfig = require('./webpack.prod.config');
 
 const spinner = ora('building...').start();
 

@@ -1,6 +1,6 @@
 const path = require('path');
 const svrx = require('@svrx/svrx');
-const webpack = require('./webpack.config');
+const webpack = require('../build/dev');
 
 const server = svrx({
   root: path.resolve(__dirname, '../'),
