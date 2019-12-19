@@ -2,7 +2,8 @@ import {
   preventDefault,
   cancelBubble,
   parseTouches,
-  getMargins,
+  getBounds,
+  getOffset,
 } from './utils';
 const assign = Object.assign;
 
@@ -18,30 +19,34 @@ function MouseWheel(event) {
   preventDefault(event);
   cancelBubble(event);
   // 获取鼠标位置
-  let { offsetX, offsetY } = event;
+  let { offsetX, offsetY, target } = event;
+  // 获取 event.target 到 this.el 的 offset，解决缩放时抖动问题。
+  let offset = getOffset(target, this.el);
+  offsetX += offset.left;
+  offsetY += offset.top;
   // 根据缩放幅度和缩放速度计算缩放比例
   let delta = Math.max(-1, Math.min(1, (event.wheelDelta || -event.detail))) * zoomSpeed;
   let newZoom = zoom + delta;
   // 边界情况判断，开启回弹效果
   if (newZoom < minZoom) {
-    newZoom = Math.max(minZoom - zoomSpeed, 0);
+    newZoom = Math.max(minZoom -zoomSpeed, 0);
     setTimeout(() => {
       this.setState(assign({}, this.state, {
         zoom: minZoom
       }))
-    }, 300)
+    }, 100)
   } else if (newZoom > maxZoom) {
     newZoom = maxZoom + zoomSpeed;
     setTimeout(() => {
       this.setState(assign({}, this.state, {
         zoom: maxZoom
       }))
-    }, 300)
+    }, 100)
   } else if (Math.abs(newZoom - 1) < (zoomSpeed / 2)) {
     newZoom = 1;
   }
   // 小于等于初始缩放比例时不允许拖拽，大于初始缩放比例时需要注意不能出界
-  if (newZoom < 1) {
+  if (newZoom <= 1) {
     dragable = false;
     translate = { x: 0, y: 0 };
     transformOrigin = {
@@ -50,26 +55,31 @@ function MouseWheel(event) {
     }
   } else {
     dragable = true;
+    // 避免直接修改原对象
+    translate = {
+      x: translate.x,
+      y: translate.y
+    };
     transformOrigin = {
       x: offsetX,
       y: offsetY,
-    }
+    };
     // 判断缩放后元素有没有出界
-    let margins = getMargins(this.el, newZoom, translate, transformOrigin);
-    for (let side in margins) {
-      if (margins[side] > 0) {
+    let bounds = getBounds(this.el, newZoom, translate, transformOrigin);
+    for (let side in bounds) {
+      if (bounds[side] > 0) {
         switch (side) {
           case 'top':
-            translate.y -= margins.top;
+            translate.y -= bounds.top;
             break;
           case 'right':
-            translate.x += margins.right;
+            translate.x += bounds.right;
             break;
           case 'bottom':
-            translate.y += margins.bottom;
+            translate.y += bounds.bottom;
             break;
           case 'left':
-            translate.x -= margins.left;
+            translate.x -= bounds.left;
             break;
         }
       }
@@ -120,9 +130,9 @@ function MouseMove(event) {
     y: translate.y + (clientY - moveStart.y),
   }
   // 判断拖拽后元素有没有出界
-  let margins = getMargins(this.el, zoom, newMovingTranslate, transformOrigin);
-  for (let side in margins) {
-    if (margins[side] > padding) {
+  let bounds = getBounds(this.el, zoom, newMovingTranslate, transformOrigin);
+  for (let side in bounds) {
+    if (bounds[side] > padding) {
       switch (side) {
         case 'top':
           newMovingTranslate.y = (transformOrigin.y * (zoom - 1)) + padding;
@@ -203,9 +213,9 @@ function TouchMove(event) {
     y: translate.y + (clientY - touchStart.y),
   }
   // 判断拖拽后元素有没有出界
-  let margins = getMargins(this.el, zoom, newMovingTranslate, transformOrigin);
-  for (let side in margins) {
-    if (margins[side] > padding) {
+  let bounds = getBounds(this.el, zoom, newMovingTranslate, transformOrigin);
+  for (let side in bounds) {
+    if (bounds[side] > padding) {
       switch (side) {
         case 'top':
           newMovingTranslate.y = (transformOrigin.y * (zoom - 1)) + padding;
@@ -299,7 +309,7 @@ function TouchZoom(event) {
     newZoom = 1;
   }
   // 小于等于 1 时不允许拖拽，大于 1 时需要注意不能出界
-  if (newZoom < 1) {
+  if (newZoom <= 1) {
     dragable = false;
     translate = { x: 0, y: 0 };
     transformOrigin = {
@@ -308,26 +318,31 @@ function TouchZoom(event) {
     }
   } else {
     dragable = true;
+    // 避免直接修改原对象
+    translate = {
+      x: translate.x,
+      y: translate.y
+    };
     transformOrigin = {
       x: (a.offsetX + b.offsetX) / 2,
       y: (a.offsetY + b.offsetY) / 2,
-    }
+    };
     // 判断缩放后元素有没有出界
-    let margins = getMargins(this.el, newZoom, translate, transformOrigin);
-    for (let side in margins) {
-      if (margins[side] > 0) {
+    let bounds = getBounds(this.el, newZoom, translate, transformOrigin);
+    for (let side in bounds) {
+      if (bounds[side] > 0) {
         switch (side) {
           case 'top':
-            translate.y -= margins.top;
+            translate.y -= bounds.top;
             break;
           case 'right':
-            translate.x += margins.right;
+            translate.x += bounds.right;
             break;
           case 'bottom':
-            translate.y += margins.bottom;
+            translate.y += bounds.bottom;
             break;
           case 'left':
-            translate.x -= margins.left;
+            translate.x -= bounds.left;
             break;
         }
       }

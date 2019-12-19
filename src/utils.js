@@ -1,5 +1,5 @@
 /**
- * 判断是否为 dom 元素
+ * 判断是否为 HTMLElement
  * @param {*} obj 
  */
 function isHTMLElement(element) {
@@ -93,7 +93,7 @@ function parseTouches(element, touches) {
  * @param {object} translate 
  * @param {object} transformOrigin 
  */
-function getMargins(element, zoom, translate, transformOrigin) {
+function getBounds(element, zoom, translate, transformOrigin) {
   let { offsetWidth, offsetHeight } = element;
   return {
     top: translate.y - (transformOrigin.y * (zoom - 1)),
@@ -102,6 +102,19 @@ function getMargins(element, zoom, translate, transformOrigin) {
     left: translate.x - (transformOrigin.x * (zoom - 1)),
   }
 }
+// 获取子元素到父元素的 offset
+function getOffset(child, parent) {
+  let offset = {
+    top: 0,
+    left: 0,
+  };
+  while(child !== parent) {
+    offset.top += child.offsetTop;
+    offset.left += child.offsetLeft;
+    child = child.parentNode;
+  }
+  return offset;
+}
 
 export {
   isHTMLElement,
@@ -109,5 +122,6 @@ export {
   cancelBubble,
   deepCompare,
   parseTouches,
-  getMargins,
+  getBounds,
+  getOffset,
 }

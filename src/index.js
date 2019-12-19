@@ -14,9 +14,9 @@ const DEFAULTOPTIONS = {
   zoomable: true, // 锁定 zoom
   dragable: true, // 锁定 position
   initZoom: 1,    // 原始缩放比例
-  minZoom: 0.1,   // 最小缩放比例
-  maxZoom: 10,    // 最大缩放比例
-  zoomSpeed: 0.2, // 默认缩放速度
+  minZoom: 1,   // 最小缩放比例
+  maxZoom: 5,    // 最大缩放比例
+  zoomSpeed: 0.1, // 默认缩放速度
   padding: 0,     // 最大内边距
 };
 
@@ -170,7 +170,10 @@ export default class SimpleZoom {
       // 暂时保存拖拽时的偏移位置
       movingTranslate: { x: 0, y: 0 },
       // 缩放中心
-      transformOrigin: { x: 0, y: 0 },
+      transformOrigin: { 
+        x: (this.el.offsetWidth / 2),
+        y: (this.el.offsetHeight / 2)
+      },
       /** PC端专用 **/
       // 是否正在拖拽
       isMouseMoving: false,
@@ -190,14 +193,8 @@ export default class SimpleZoom {
       // 两指间的距离
       touchDistance: 0,
     }
-    if (initZoom < 1) {
+    if (initZoom <= 1) {
       state.dragable = false;
-    }
-    if (initZoom != 1) {
-      state.transformOrigin = {
-        x: (this.el.offsetWidth / 2),
-        y: (this.el.offsetHeight / 2)
-      }
     }
     this.setState(state);
   }
@@ -218,13 +215,13 @@ export default class SimpleZoom {
   setState(state) {
     this.state = this.state || state;
     // 对比前后的 state，根据变动抛出相应的事件
-    let isMoving = (state.isMouseMoving || state.isTouchMoving);
+    let isMoved = (state.isMouseMoving || state.isTouchMoving);
     let isZoomed = !utils.deepCompare(this.state.zoom, state.zoom);
     let isTranslated = !utils.deepCompare(this.state.translate, state.translate);
     let transformOriginChanged = !utils.deepCompare(this.state.transformOrigin, state.transformOrigin);
     this.state = assign({}, this.state, state);
     // 移动过程中以及 zoom 和 translate 变更时，需要更新 style.transform
-    if (isMoving) {
+    if (isMoved) {
       this._setTransform(state.zoom, state.movingTranslate);
     } else if (isZoomed || isTranslated) {
       this._setTransform(state.zoom, state.translate);
@@ -235,23 +232,16 @@ export default class SimpleZoom {
     }
     // 触发相应的事件
     let timestamp = Date.now();
-    if (isMoving || isTranslated) {
+    if (isMoved || isTranslated) {
       this._dispatchEvent('move', {
         type: 'move',
         data: state,
         timestamp,
       });
     }
-    if (isZoomed) {
+    if (isZoomed || transformOriginChanged) {
       this._dispatchEvent('zoom', {
         type: 'zoom',
-        data: state,
-        timestamp,
-      });
-    }
-    if (transformOriginChanged) {
-      this._dispatchEvent('origin-change', {
-        type: 'origin-change',
         data: state,
         timestamp,
       });
@@ -318,6 +308,16 @@ export default class SimpleZoom {
     if (this._eventListeners[type] && this._eventListeners[type].length) {
       this._eventListeners[type] = this._eventListeners[type].filter((listener) => {
         return listener !== callback;
+      })
+    }
+  }
+  subscribe(instance) {
+    if(instance && instance instanceof SimpleZoom) {
+      instance.addEventListener('move', (event) => {
+        this.setState(event.data)
+      })
+      instance.addEventListener('zoom', (event) => {
+        this.setState(event.data)
       })
     }
   }
