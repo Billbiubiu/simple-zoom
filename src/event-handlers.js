@@ -3,7 +3,6 @@ import {
   cancelBubble,
   parseTouches,
   getBounds,
-  getOffset,
 } from './utils';
 const assign = Object.assign;
 
@@ -19,11 +18,9 @@ function MouseWheel(event) {
   preventDefault(event);
   cancelBubble(event);
   // 获取鼠标位置
-  let { offsetX, offsetY, target } = event;
-  // 获取 event.target 到 this.el 的 offset，解决缩放时抖动问题。
-  let offset = getOffset(target, this.el);
-  offsetX += offset.left;
-  offsetY += offset.top;
+  let { clientX, clientY } = event;
+  let offsetX = clientX - this.el.clientLeft;
+  let offsetY = clientY - this.el.clientTop;
   // 根据缩放幅度和缩放速度计算缩放比例
   let delta = Math.max(-1, Math.min(1, (event.wheelDelta || -event.detail))) * zoomSpeed;
   let newZoom = zoom + delta;
@@ -34,14 +31,14 @@ function MouseWheel(event) {
       this.setState(assign({}, this.state, {
         zoom: minZoom
       }))
-    }, 100)
+    }, 200)
   } else if (newZoom > maxZoom) {
     newZoom = maxZoom + zoomSpeed;
     setTimeout(() => {
       this.setState(assign({}, this.state, {
         zoom: maxZoom
       }))
-    }, 100)
+    }, 200)
   } else if (Math.abs(newZoom - 1) < (zoomSpeed / 2)) {
     newZoom = 1;
   }
@@ -138,10 +135,10 @@ function MouseMove(event) {
           newMovingTranslate.y = (transformOrigin.y * (zoom - 1)) + padding;
           break;
         case 'right':
-          newMovingTranslate.x = ((this.el.offsetWidth - transformOrigin.x) * (1 - zoom)) - padding;
+          newMovingTranslate.x = ((this.el.clientWidth - transformOrigin.x) * (1 - zoom)) - padding;
           break;
         case 'bottom':
-          newMovingTranslate.y = ((this.el.offsetHeight - transformOrigin.y) * (1 - zoom)) - padding;
+          newMovingTranslate.y = ((this.el.clientHeight - transformOrigin.y) * (1 - zoom)) - padding;
           break;
         case 'left':
           newMovingTranslate.x = (transformOrigin.x * (zoom - 1)) + padding;

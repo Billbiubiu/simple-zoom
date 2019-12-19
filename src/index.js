@@ -55,7 +55,7 @@ export default class SimpleZoom {
     // 覆盖默认的配置
     this.options = assign({}, DEFAULTOPTIONS, options);
     // 不允许 padding 超过宽高的一半
-    this.options.padding = Math.min((this.el.offsetWidth / 2), (this.el.offsetHeight / 2), this.options.padding);
+    this.options.padding = Math.min((this.el.clientWidth / 2), (this.el.clientHeight / 2), this.options.padding);
     // 不允许 initZoom 超过范围
     this.options.initZoom = Math.max(Math.max(this.options.minZoom, this.options.initZoom), Math.min(this.options.maxZoom, this.options.initZoom));
     // 根据 options 添加 class

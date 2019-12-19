@@ -69,7 +69,7 @@ function deepCompare(a, b) {
  * @param {array} touches 
  */
 function parseTouches(element, touches) {
-  let {offsetTop, offsetLeft} = element;
+  let { clientTop, clientLeft } = element;
   return Array.from(touches).map(d => ({
     clientX: d.clientX,
     clientY: d.clientY,
@@ -82,8 +82,8 @@ function parseTouches(element, touches) {
     rotationAngle: d.rotationAngle,
     screenX: d.screenX,
     screenY: d.screenY,
-    offsetX: d.clientX - offsetTop,
-    offsetY: d.clientY - offsetLeft,
+    offsetX: d.clientX - clientTop,
+    offsetY: d.clientY - clientLeft,
   }))
 }
 /**
@@ -94,26 +94,13 @@ function parseTouches(element, touches) {
  * @param {object} transformOrigin 
  */
 function getBounds(element, zoom, translate, transformOrigin) {
-  let { offsetWidth, offsetHeight } = element;
+  let { clientWidth, clientHeight } = element;
   return {
     top: translate.y - (transformOrigin.y * (zoom - 1)),
-    right: ((offsetWidth - transformOrigin.x) * (1 - zoom)) - translate.x,
-    bottom: ((offsetHeight - transformOrigin.y) * (1 - zoom)) - translate.y,
+    right: ((clientWidth - transformOrigin.x) * (1 - zoom)) - translate.x,
+    bottom: ((clientHeight - transformOrigin.y) * (1 - zoom)) - translate.y,
     left: translate.x - (transformOrigin.x * (zoom - 1)),
   }
-}
-// 获取子元素到父元素的 offset
-function getOffset(child, parent) {
-  let offset = {
-    top: 0,
-    left: 0,
-  };
-  while(child !== parent) {
-    offset.top += child.offsetTop;
-    offset.left += child.offsetLeft;
-    child = child.parentNode;
-  }
-  return offset;
 }
 
 export {
@@ -123,5 +110,4 @@ export {
   deepCompare,
   parseTouches,
   getBounds,
-  getOffset,
 }

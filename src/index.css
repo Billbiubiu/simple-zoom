@@ -6,6 +6,10 @@
 .simple-zoom-el {
   cursor: pointer;
 }
+/* 拖拽时改变鼠标样式 */
+.simple-zoom-el.move {
+  cursor: move;
+}
 /* 禁止缩放，恢复默认图标 */
 .simple-zoom-el.zoom-locked {
   cursor: default;
@@ -13,11 +17,4 @@
 /* 禁止拖拽，恢复默认图标 */
 .simple-zoom-el.drag-locked {
   cursor: default;
-}
-/* 拖拽时改变鼠标样式 */
-.simple-zoom-el.move {
-  cursor: move;
-}
-.simple-zoom-el:hover svg {
-  pointer-events: none;
 }

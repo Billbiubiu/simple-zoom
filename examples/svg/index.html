@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
+  <script src="../lib/axios.min.js"></script>
+  <link rel="stylesheet" href="../../dist/simple-zoom.css">
+  <script src="../../dist/simple-zoom.js"></script>
+  <link rel="stylesheet" href="./index.css">
+</head>
+
+<body>
+  <div id="app">
+    <button id="open-state-bar">· · ·</button>
+    <div id="state-bar" class="hidden">
+      <div class="content">
+
+      </div>
+      <div class="footer">
+        <button id="show-state" class="hidden">State</button>
+        <button id="show-events">Events</button>
+        <button id="reset-state">Reset</button>
+        <button id="close-state-bar">Close</button>
+      </div>
+    </div>
+    <div id="zoom-container">
+      <!-- <div id="zoom-item">
+        <img src="../images/wallpaper.jpg">
+      </div> -->
+      <svg id="zoom-item">
+      </svg>
+    </div>
+  </div>
+  <script src="./index.js"></script>
+</body>
+
+</html>
