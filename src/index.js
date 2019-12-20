@@ -7,6 +7,7 @@
 import './index.css';
 import * as utils from './utils';
 import * as eventHandlers from './event-handlers';
+
 const assign = Object.assign;
 
 // 默认配置
@@ -92,6 +93,7 @@ export default class SimpleZoom {
   /**
    * 初始化 state 和事件监听
    * @memberof SimpleZoom
+   * @instance
    */
   _init() {
     // 初始状态
@@ -112,6 +114,7 @@ export default class SimpleZoom {
   /**
    * 设置 transform 属性
    * @memberof SimpleZoom
+   * @instance
    * @param {number} zoom 
    * @param {object} translate 
    */
@@ -122,6 +125,7 @@ export default class SimpleZoom {
   /**
    * 设置 transformOrigin 属性
    * @memberof SimpleZoom
+   * @instance
    * @param {object} transformOrigin 
    */
   _setTransformOrigin(transformOrigin) {
@@ -131,6 +135,7 @@ export default class SimpleZoom {
   /**
    * 执行已有的事件监听
    * @memberof SimpleZoom
+   * @instance
    * @param {string} type 
    * @param {event} event 
    */
@@ -160,6 +165,7 @@ export default class SimpleZoom {
   /**
    * 重置当前 state
    * @memberof SimpleZoom
+   * @instance
    */
   reset() {
     let { zoomable, dragable, initZoom } = this.options;
@@ -206,6 +212,7 @@ export default class SimpleZoom {
   /**
    * 手动更新实例
    * @memberof SimpleZoom
+   * @instance
    */
   update() {
     let { zoom, translate, transformOrigin } = this.state;
@@ -214,6 +221,8 @@ export default class SimpleZoom {
   }
   /**
    * 销毁当前实例
+   * @memberof SimpleZoom
+   * @instance
    */
   destroy() {
     let { zoomable, dragable } = this.options;
@@ -230,6 +239,7 @@ export default class SimpleZoom {
   /**
    * 设置 state，自动更新 dom 并抛出相应的事件
    * @memberof SimpleZoom
+   * @instance
    * @param {object} state 
    */
   setState(state) {
@@ -271,6 +281,7 @@ export default class SimpleZoom {
   /**
    * 绑定事件监听
    * @memberof SimpleZoom
+   * @instance
    * @param {string} type 
    * @param {function} callback 
    */
@@ -286,6 +297,7 @@ export default class SimpleZoom {
   /**
    * 关闭事件监听
    * @memberof SimpleZoom
+   * @instance
    * @param {string} type 
    */
   off(type) {
@@ -294,6 +306,7 @@ export default class SimpleZoom {
   /**
    * 添加事件监听
    * @memberof SimpleZoom
+   * @instance
    * @param {string} type 
    * @param {function} callback 
    */
@@ -313,6 +326,7 @@ export default class SimpleZoom {
   /**
    * 移除事件监听
    * @memberof SimpleZoom
+   * @instance
    * @param {string} type 
    * @param {function} callback 
    */
@@ -323,12 +337,15 @@ export default class SimpleZoom {
       })
     }
   }
+  /**
+   * 订阅已有实例，同步缩放
+   * @memberof SimpleZoom
+   * @instance
+   * @param {*} instance 
+   */
   subscribe(instance) {
     if(instance && instance instanceof SimpleZoom) {
-      instance.addEventListener('move', (event) => {
-        this.setState(event.data)
-      })
-      instance.addEventListener('zoom', (event) => {
+      instance.addEventListener('updated', (event) => {
         this.setState(event.data)
       })
     }
