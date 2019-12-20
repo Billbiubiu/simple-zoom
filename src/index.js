@@ -134,7 +134,12 @@ export default class SimpleZoom {
    * @param {string} type 
    * @param {event} event 
    */
-  _dispatchEvent(type, event) {
+  _dispatchEvent(type, data) {
+    let event = {
+      type,
+      data,
+      timestamp: Date.now()
+    };
     if (this._onListeners[type]) {
       try {
         this._onListeners[type](event);
@@ -171,8 +176,8 @@ export default class SimpleZoom {
       movingTranslate: { x: 0, y: 0 },
       // 缩放中心
       transformOrigin: { 
-        x: (this.el.offsetWidth / 2),
-        y: (this.el.offsetHeight / 2)
+        x: (this.el.clientWidth / 2),
+        y: (this.el.clientHeight / 2)
       },
       /** PC端专用 **/
       // 是否正在拖拽
@@ -199,13 +204,28 @@ export default class SimpleZoom {
     this.setState(state);
   }
   /**
-   * 手动更新
+   * 手动更新实例
    * @memberof SimpleZoom
    */
   update() {
     let { zoom, translate, transformOrigin } = this.state;
     this._setTransform(zoom, translate);
     this._setTransformOrigin(transformOrigin)
+  }
+  /**
+   * 销毁当前实例
+   */
+  destroy() {
+    let { zoomable, dragable } = this.options;
+    if (zoomable) {
+      this.el.removeEventListener('mousewheel', this._on['mousewheel']);
+      this.el.removeEventListener('DOMMouseScroll', this._on['DOMMouseScroll']);
+      this.parentNode.removeEventListener('touchstart', this._on['touchzoomstart']);
+    }
+    if (dragable) {
+      this.el.removeEventListener('mousedown', this._on['mousedown']);
+      this.parentNode.removeEventListener('touchstart', this._on['touchmovestart']);
+    }
   }
   /**
    * 设置 state，自动更新 dom 并抛出相应的事件
@@ -231,21 +251,13 @@ export default class SimpleZoom {
       this._setTransformOrigin(state.transformOrigin);
     }
     // 触发相应的事件
-    let timestamp = Date.now();
     if (isMoved || isTranslated) {
-      this._dispatchEvent('move', {
-        type: 'move',
-        data: state,
-        timestamp,
-      });
+      this._dispatchEvent('move', state);
     }
     if (isZoomed || transformOriginChanged) {
-      this._dispatchEvent('zoom', {
-        type: 'zoom',
-        data: state,
-        timestamp,
-      });
+      this._dispatchEvent('zoom', state);
     }
+    this._dispatchEvent('updated', state)
   }
   get state() {
     return this._state;

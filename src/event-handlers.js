@@ -17,7 +17,7 @@ function MouseWheel(event) {
   if (!zoomable) return;
   preventDefault(event);
   cancelBubble(event);
-  // 获取鼠标位置
+  // 获取鼠标相对左上角的位置
   let { clientX, clientY } = event;
   let offsetX = clientX - this.el.clientLeft;
   let offsetY = clientY - this.el.clientTop;
@@ -47,8 +47,8 @@ function MouseWheel(event) {
     dragable = false;
     translate = { x: 0, y: 0 };
     transformOrigin = {
-      x: (this.el.offsetWidth / 2),
-      y: (this.el.offsetHeight / 2),
+      x: (this.el.clientWidth / 2),
+      y: (this.el.clientHeight / 2),
     }
   } else {
     dragable = true;
@@ -218,10 +218,10 @@ function TouchMove(event) {
           newMovingTranslate.y = (transformOrigin.y * (zoom - 1)) + padding;
           break;
         case 'right':
-          newMovingTranslate.x = ((this.el.offsetWidth - transformOrigin.x) * (1 - zoom)) - padding;
+          newMovingTranslate.x = ((this.el.clientWidth - transformOrigin.x) * (1 - zoom)) - padding;
           break;
         case 'bottom':
-          newMovingTranslate.y = ((this.el.offsetHeight - transformOrigin.y) * (1 - zoom)) - padding;
+          newMovingTranslate.y = ((this.el.clientHeight - transformOrigin.y) * (1 - zoom)) - padding;
           break;
         case 'left':
           newMovingTranslate.x = (transformOrigin.x * (zoom - 1)) + padding;
@@ -310,8 +310,8 @@ function TouchZoom(event) {
     dragable = false;
     translate = { x: 0, y: 0 };
     transformOrigin = {
-      x: (this.el.offsetWidth / 2),
-      y: (this.el.offsetHeight / 2),
+      x: (this.el.clientWidth / 2),
+      y: (this.el.clientHeight / 2),
     }
   } else {
     dragable = true;

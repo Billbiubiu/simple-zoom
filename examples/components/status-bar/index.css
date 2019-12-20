@@ -1,0 +1,30 @@
+.status-bar{
+  position: absolute;
+  top: 1em;
+  left: 1em;
+  background: rgba(0,0,0,.5);
+  color: #fff;
+  border-radius: 4px;
+  padding: 0.5em;
+  z-index: 999;
+}
+.status-bar .header .title{
+  font-size: 1.2em;
+}
+.status-bar .content{
+  min-width: 10em;
+  max-height: 30em;
+  overflow: auto;
+}
+.status-bar .footer{
+  margin-top: 0.5em;
+}
+.status-bar .footer button{
+  display: inline-block;
+  width: 100%;
+  padding: 0.5em;
+  color: #fff;
+  background: #409EFF;
+  border: none;
+  border-radius: 4px;
+}
