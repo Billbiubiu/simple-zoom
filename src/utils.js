@@ -102,6 +102,27 @@ function getBounds(element, zoom, translate, transformOrigin) {
     left: translate.x - (transformOrigin.x * (zoom - 1)),
   }
 }
+function getOffset(event, element) {
+  let {target, offsetX, offsetY, clientX, clientY} = event;
+  if(target instanceof SVGElement || element instanceof SVGElement) {
+    return {
+      // offsetX: clientX - element.clientLeft,
+      // offsetY: clientY - element.clientTop,
+      offsetX: (element.clientWidth / 2),
+      offsetY: (element.clientHeight / 2)
+    }
+  }else {
+    while(target !== element) {
+      offsetX += target.offsetLeft;
+      offsetY += target.offsetTop;
+      target = target.offsetParent;
+    }
+    return {
+      offsetX,
+      offsetY
+    }
+  }
+}
 
 export {
   isHTMLElement,
@@ -110,4 +131,5 @@ export {
   deepCompare,
   parseTouches,
   getBounds,
+  getOffset,
 }

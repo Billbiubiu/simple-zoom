@@ -3,6 +3,7 @@ import {
   cancelBubble,
   parseTouches,
   getBounds,
+  getOffset
 } from './utils';
 const assign = Object.assign;
 
@@ -18,9 +19,7 @@ function MouseWheel(event) {
   preventDefault(event);
   cancelBubble(event);
   // 获取鼠标相对左上角的位置
-  let { clientX, clientY } = event;
-  let offsetX = clientX - this.el.clientLeft;
-  let offsetY = clientY - this.el.clientTop;
+  let {offsetX, offsetY} = getOffset(event, this.el);
   // 根据缩放幅度和缩放速度计算缩放比例
   let delta = Math.max(-1, Math.min(1, (event.wheelDelta || -event.detail))) * zoomSpeed;
   let newZoom = zoom + delta;

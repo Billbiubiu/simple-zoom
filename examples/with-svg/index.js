@@ -17,7 +17,7 @@ let app = new Vue({
                 .attr('width', clientWidth)
                 .attr('height', clientHeight)
                 .attr('transform', `translate(${clientWidth / 2} ${clientHeight / 2})`)
-            let maxRadius = Math.max(clientWidth, clientHeight);
+            let maxRadius = Math.min(clientWidth / 2, clientHeight / 2);
             let initRadius = 1;
             while (initRadius < maxRadius) {
                 let radius = initRadius;
