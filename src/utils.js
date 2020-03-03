@@ -103,13 +103,11 @@ function getBounds(element, zoom, translate, transformOrigin) {
   }
 }
 function getOffset(event, element) {
-  let {target, offsetX, offsetY, clientX, clientY} = event;
+  let {target, offsetX, offsetY} = event;
   if(target instanceof SVGElement || element instanceof SVGElement) {
     return {
-      // offsetX: clientX - element.clientLeft,
-      // offsetY: clientY - element.clientTop,
-      offsetX: (element.clientWidth / 2),
-      offsetY: (element.clientHeight / 2)
+      offsetX,
+      offsetY,
     }
   }else {
     while(target !== element) {
