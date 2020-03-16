@@ -269,15 +269,6 @@ export default class SimpleZoom {
     }
     this._dispatchEvent('updated', state)
   }
-  get state() {
-    return this._state;
-  }
-  set state(state) {
-    // 以 option 的配置为标准
-    state.zoomable = (state.zoomable && this.options.zoomable);
-    state.dragable = (state.dragable && this.options.dragable);
-    this._state = state;
-  }
   /**
    * 绑定事件监听
    * @memberof SimpleZoom
