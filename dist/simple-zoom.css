@@ -1,0 +1,21 @@
+/* 溢出隐藏 */
+.simple-zoom-container {
+  overflow: hidden;
+}
+/* 鼠标移入改变鼠标样式 */
+.simple-zoom-el {
+  cursor: pointer;
+}
+/* 拖拽时改变鼠标样式 */
+.simple-zoom-el.move {
+  cursor: move;
+}
+/* 禁止缩放，恢复默认图标 */
+.simple-zoom-el.zoom-locked {
+  cursor: default;
+}
+/* 禁止拖拽，恢复默认图标 */
+.simple-zoom-el.drag-locked {
+  cursor: default;
+}
+/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IiIsImZpbGUiOiJzaW1wbGUtem9vbS5jc3MiLCJzb3VyY2VSb290IjoiIn0=*/

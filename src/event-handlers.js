@@ -25,19 +25,9 @@ function MouseWheel(event) {
   let newZoom = zoom + delta;
   // 边界情况判断，开启回弹效果
   if (newZoom < minZoom) {
-    newZoom = Math.max(minZoom -zoomSpeed, 0);
-    setTimeout(() => {
-      this.setState(assign({}, this.state, {
-        zoom: minZoom
-      }))
-    }, 200)
+    newZoom = minZoom;
   } else if (newZoom > maxZoom) {
-    newZoom = maxZoom + zoomSpeed;
-    setTimeout(() => {
-      this.setState(assign({}, this.state, {
-        zoom: maxZoom
-      }))
-    }, 200)
+    newZoom = maxZoom;
   } else if (Math.abs(newZoom - 1) < (zoomSpeed / 2)) {
     newZoom = 1;
   }
